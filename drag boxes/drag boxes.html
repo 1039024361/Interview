@@ -14,7 +14,11 @@
             box-sizing: border-box;
             border:1px solid black;
         }
-
+        body{
+            min-width: 680px;
+            min-height: 500px;
+            overflow: hidden;
+        }
         #list-area{
             position: relative;
             width: 402px;   /*包括border宽*/
@@ -111,7 +115,8 @@
             var index = 0,
                 dropXY = [0,0],
                 allBoxesXY = [],
-                bbox = document.getElementById("list-area").getBoundingClientRect();
+                bbox;
+//                bbox = 1;
 
             //var listArea = document.getElementById("list-area");
             //var storageArea = document.getElementById("storage-area");
@@ -205,6 +210,7 @@
             //获取释放元素对应client的X, Y坐标
             var _getDropXY = function(target, delay){
                 var prev = Date.now();  //节流处理
+                bbox = document.getElementById("list-area").getBoundingClientRect();
 
                 return function(event){
                     event = EventUtil.getEvent(event);
