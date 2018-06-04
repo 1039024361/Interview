@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CSS</title>
+    <style>
+        .first-wrap{
+            position: relative;
+            width: 400px;
+            height: 400px;
+            background-color: red;
+            z-index: 6;
+        }
+        .static{
+            width: 200px;
+            height: 200px;
+            background-color: aqua;
+        }
+        .non-static{
+            width: 200px;
+            height: 200px;
+            position: absolute;
+        }
+        .first{
+            top: 25px;
+            left: 25px;
+            z-index: 1;
+            background-color: #ac86e3;
+            opacity: 0.8;
+        }
+        .second{
+            top: 50px;
+            left: 50px;
+            z-index: 0;
+            background-color: #4539e3;
+        }
+        p {
+            color: #f55;
+            background: #fcc;
+            width: 200px;
+            line-height: 100px;
+            text-align:center;
+            margin: 100px;
+        }
+        .p-wrap{
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+<div class="first-wrap">
+    <div class="non-static first"></div>
+    <div class="static"></div>
+    <div class="non-static second"></div>
+    <!--<p>Haha</p>-->
+    <!--<p>Hehe</p>-->
+</div>
+<!--<p>Haha</p>-->
+<!--<div class="p-wrap">-->
+    <!--<p>Hehe</p>-->
+<!--</div>-->
+</body>
+</html>

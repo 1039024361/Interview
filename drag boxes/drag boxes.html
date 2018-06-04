@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>灵活的箱子</title>
+    <style>
+        /*reset style*/
+        *{
+            padding: 0;
+            margin: 0;
+        }
+
+        div{
+            box-sizing: border-box;
+            border:1px solid black;
+        }
+
+        #list-area{
+            position: relative;
+            width: 402px;   /*包括border宽*/
+            height: 402px;  /*包括border宽*/
+        }
+
+        #storage-area{
+            width: 230px;   /*包括border宽*/
+            height: 362px;  /*包括border宽*/
+            overflow: auto;
+        }
+
+        .bottom-text{
+            border-top: none;
+            background-color: #acbd78;
+            text-align: center;
+        }
+
+        #list-area-wrap, #storage-area-wrap{
+            display: inline-block;
+            vertical-align: top;
+        }
+
+        #create-logo{
+            margin: 10px 0;
+            padding: 3px;
+            border-radius: 8px;
+            /*cursor: not-allowed;*/
+        }
+
+        #list-area div{
+            width: 80px;
+            height: 80px;
+        }
+
+        .logo{
+            width: 80px;
+            height: 80px;
+            text-align: center;
+            padding-top: 30px;
+            font-weight: bold;
+            /*background-color: #8a1015;*/
+        }
+
+        #storage-area .logo{
+            float: left;
+            margin: 10px 0 10px 10px;
+        }
+
+        #list-area .logo{
+            position: absolute;
+        }
+
+        #storage-area:after{
+            content: ' ';
+            visibility: hidden;
+            display: block;
+            height: 0;
+            clear: both;
+        }
+
+        .text-wrap{
+            border: none;
+            /*z-index: -1;*/
+            /*background-color: #4539e3;*/
+            position: relative;
+        }
+    </style>
+
+</head>
+<body>
+    <div  id="list-area-wrap" style="border: none;">
+        <div id="list-area">
+
+        </div>
+        <div class="bottom-text">
+            <p>Logo排列区</p>
+        </div>
+    </div>
+
+    <div id="storage-area-wrap" style="border: none; margin-left: 30px">
+        <div id="storage-area">
+
+        </div>
+        <div class="bottom-text">
+            <p>Logo排列区</p>
+        </div>
+        <button id="create-logo">创建新Logo</button>
+    </div>
+    <script src="EventUtil.js"></script>
+    <script>
+        var Fun = (function(){
+
+            var index = 0,
+                dropXY = [0,0],
+                allBoxesXY = [],
+                bbox = document.getElementById("list-area").getBoundingClientRect();
+
+            //var listArea = document.getElementById("list-area");
+            //var storageArea = document.getElementById("storage-area");
+
+            var _addEvent = function(target, type, fn){
+                EventUtil.addHandler(target, type, fn);
+            };
+
+            var _createLogo = function(target){
+                return function (event){
+                    index = index > 25? 0: index;
+                    var letter = String.fromCharCode(65+(index++));
+                    var logo = document.createElement("div");
+                    logo.id = letter;
+                    logo.className = "logo";
+                    logo.draggable = "true";    //设置div可拖动
+                    var textDiv = document.createElement("div");
+                    textDiv.className = "text-wrap";
+                    var text = document.createTextNode(letter);
+                    textDiv.appendChild(text);
+                    logo.appendChild(textDiv);
+                    target.storageArea.appendChild(logo);
+                }
+            };
+
+//            var _preventDefault = function(droptarget){    //阻止浏览器默认拖拽行为
+//
+//                var defaultHandle = function(event){
+//                    EventUtil.preventDefault(event);
+//                };
+//                _addEvent(droptarget, "dragover", defaultHandle);
+//                _addEvent(droptarget, "dragenter", defaultHandle);
+//                _addEvent(droptarget, "drop", defaultHandle);
+//            };
+
+            var _drag = function(target){
+
+                var dragStarHandle = function(event){
+                    event = EventUtil.getEvent(event);
+                    event.dataTransfer.setData("Text", event.target.id);
+                    console.log("set event.target.id: " + event.target.id);
+//                    _getDropXY(document.getElementById("list-area"), 1)(event);
+                };
+
+                var defaultHandle = function(event){
+                    EventUtil.preventDefault(event);
+                };
+                _addEvent(target, "dragover", defaultHandle);
+                _addEvent(target, "dragenter", defaultHandle);
+                _addEvent(target, "drop", defaultHandle);
+                _addEvent(target, "dragstart", dragStarHandle);
+
+            };
+
+            var _drop = function(target){
+                var drop = function(event) {
+                        event.preventDefault();
+                        var data=event.dataTransfer.getData("Text"),
+                            dragDiv = document.getElementById(data),
+                            currentDropXY = [0,0];
+//                            targetDropXY = dropXY;
+
+                        console.log("get event.target.id: "+data);
+                        if(event.currentTarget.id === "list-area"){
+                            if(_judgeDropArea(event.currentTarget, dropXY)){
+                                if(dragDiv.parentNode.id === "list-area"){   //同区域拖放,要先删除之前的数组标记
+                                    currentDropXY[0] = Math.round(parseInt(dragDiv.style.left));  //避免非整数对比
+                                    currentDropXY[1] = Math.round(parseInt(dragDiv.style.top));  //避免非整数对比
+                                    allBoxesXY.splice(allBoxesXY.indexOf(currentDropXY.slice(0).join("-")), 1);  //删除元素
+                                }
+                                dragDiv.style.left = dropXY[0]+"px";
+                                dragDiv.style.top = dropXY[1]+"px";
+                                event.currentTarget.appendChild(dragDiv);
+                                allBoxesXY.push(dropXY.slice(0).join("-"));   //将拖放元素坐标放入数组   对数组深拷贝
+                            }
+                            //event.currentTarget.style.cursor = "auto";
+                        }
+                        else if(event.currentTarget.id === "storage-area"){
+                            if(dragDiv.parentNode.id === "list-area"){   //如果由排列区移动过来，则将数组中坐标清除
+                                currentDropXY[0] = Math.round(parseInt(dragDiv.style.left));  //避免非整数对比
+                                currentDropXY[1] = Math.round(parseInt(dragDiv.style.top));  //避免非整数对比
+                                allBoxesXY.splice(allBoxesXY.indexOf(currentDropXY.slice(0).join("-")), 1);  //删除元素
+                            }
+                            event.currentTarget.appendChild(dragDiv);
+                        }
+                    };
+                _addEvent(target, "drop", drop);
+            };
+
+            //target: 释放的目标元素
+            //获取释放元素对应client的X, Y坐标
+            var _getDropXY = function(target, delay){
+                var prev = Date.now();  //节流处理
+
+                return function(event){
+                    event = EventUtil.getEvent(event);
+//                    var myTarget = EventUtil.getTarget(event);
+                    //console.log("drag");
+                    var now = Date.now();
+                    if(now - prev > delay){
+                        dropXY[0] = event.clientX - bbox.left;
+                        dropXY[1] = event.clientY - bbox.top;
+                        prev = Date.now();
+                        dropXY = _adjustDropXY(dropXY, bbox);
+                        _judgeDropArea(target, dropXY);
+                        //console.log(dropXY);
+                    }
+                }
+            };
+
+            //建立释放规则
+            var _adjustDropXY = function(dropXY, bbox){
+                var newDropXY =[0, 0];
+                //console.log("dropXY "+dropXY);
+                newDropXY[0] = Math.ceil(dropXY[0]/100)*100-90+1;   //加1表示线宽
+                newDropXY[1] = Math.ceil(dropXY[1]/100)*100-90+1;
+                //console.log("newDropXY "+newDropXY);
+                if(newDropXY[0]<0){
+                    newDropXY[0] = 10;
+                }
+                else if(newDropXY[0]>bbox.width-100-1+10){
+                    newDropXY[0] = bbox.width-100-1+10;
+                }
+                if(newDropXY[1]<0){
+                    newDropXY[1] = 10;
+                }
+                else if(newDropXY[1]>bbox.height-100-1+10){   //100为每个虚拟小方格大小
+                    newDropXY[1] = bbox.height-100-1+10;
+                }
+                //console.log("newDropXY "+newDropXY);
+                return newDropXY;
+            };
+
+            //判断能否释放
+            var _judgeDropArea = function(target, dropXY){
+                //console.log("dropXY:");
+                //console.log(dropXY);
+                //console.log("allBoxesXY:");
+                //console.log(allBoxesXY);
+                //console.log(allBoxesXY.indexOf(dropXY.slice(0).join("-")));
+                if(allBoxesXY.indexOf(dropXY.slice(0).join("-")) !== -1){
+                    target.style.cursor = "not-allowed";
+                    return false;
+                }
+                else{
+                    target.style.cursor = "auto";
+                    return true;
+                }
+            };
+
+
+            var DragFun = function(){};
+
+            DragFun.prototype.init = function(){
+                this.listArea = document.getElementById("list-area");
+                this.storageArea = document.getElementById("storage-area");
+                this.createLogo = document.getElementById("create-logo");
+//                _addEvent(this.storageArea, "drag", _getDropXY(this.listArea, 1));   //获取坐标位置   注意，此时拖拽元素还是与storageArea
+//                _addEvent(this.listArea, "drag", _getDropXY(this.listArea, 1));
+                _addEvent(this.storageArea, "drag", _getDropXY(this.listArea, 1));   //获取坐标位置   注意，此时拖拽元素还是与storageArea
+                _addEvent(this.listArea, "drag", _getDropXY(this.listArea, 1));
+                _addEvent(this.createLogo, "click", _createLogo(this));
+                _drag(this.listArea);
+                _drag(this.storageArea);
+                _drop(this.listArea);
+                _drop(this.storageArea);
+            };
+
+            return DragFun;
+        })();
+
+        window.onload = function(){
+            new Fun().init();
+        };
+    </script>
+</body>
+</html>
