@@ -15,9 +15,9 @@
             border:1px solid black;
         }
         body{
-            min-width: 680px;
-            min-height: 500px;
-            overflow: hidden;
+            min-width: 402px;
+            /*min-height: 500px;*/
+            /*overflow: hidden;*/
         }
         #list-area{
             position: relative;
@@ -38,10 +38,24 @@
         }
 
         #list-area-wrap, #storage-area-wrap{
-            display: inline-block;
+            float: left;
+            /*display: inline-block;*/
             vertical-align: top;
         }
 
+        #storage-area-wrap{
+            margin-left: 30px;
+        }
+
+        @media only screen and (max-width: 680px) {
+            #storage-area-wrap{
+                margin: 10px 0;
+                width: 402px;
+            }
+            #storage-area{
+                width: 402px;
+            }
+        }
         #create-logo{
             margin: 10px 0;
             padding: 3px;
@@ -72,7 +86,7 @@
             position: absolute;
         }
 
-        #storage-area:after{
+        #storage-area:after, body:after{
             content: ' ';
             visibility: hidden;
             display: block;
@@ -99,7 +113,7 @@
         </div>
     </div>
 
-    <div id="storage-area-wrap" style="border: none; margin-left: 30px">
+    <div id="storage-area-wrap" style="border: none;">
         <div id="storage-area">
 
         </div>
@@ -115,7 +129,10 @@
             var index = 0,
                 dropXY = [0,0],
                 allBoxesXY = [],
-                bbox;
+                bbox = {
+                    top:0,
+                    left:0
+                };
 //                bbox = 1;
 
             //var listArea = document.getElementById("list-area");
@@ -210,7 +227,7 @@
             //获取释放元素对应client的X, Y坐标
             var _getDropXY = function(target, delay){
                 var prev = Date.now();  //节流处理
-                bbox = document.getElementById("list-area").getBoundingClientRect();
+//                bbox = document.getElementById("list-area").getBoundingClientRect();
 
                 return function(event){
                     event = EventUtil.getEvent(event);
@@ -218,8 +235,8 @@
                     //console.log("drag");
                     var now = Date.now();
                     if(now - prev > delay){
-                        dropXY[0] = event.clientX - bbox.left;
-                        dropXY[1] = event.clientY - bbox.top;
+                        dropXY[0] = event.pageX - bbox.left;
+                        dropXY[1] = event.pageY - bbox.top;
                         prev = Date.now();
                         dropXY = _adjustDropXY(dropXY, bbox);
                         _judgeDropArea(target, dropXY);
