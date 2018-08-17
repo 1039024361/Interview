@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Flex: 三栏布局</title>
+    <style>
+        .container{
+            display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;       /*nowrap：自动缩小项目，不换行*/
+            width: 100%;
+        }
+        .left{
+            display: inline-flex;
+            width: 100px;
+            flex: 0 0 auto;
+            background-color: #ac86e3;
+            height: 100px;
+        }
+        .center{
+            display: inline-flex;
+            flex: 0 1 auto;
+            background-color: #eec744;
+            height: 150px;
+            width: 100%;
+        }
+        .right{
+            display: inline-flex;
+            width: 100px;
+            flex: 0 0 auto;
+            background-color: #f97b62;
+            height: 40px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="left"></div>
+    <div class="center"></div>
+    <div class="right"></div>
+</div>
+</body>
+</html>
